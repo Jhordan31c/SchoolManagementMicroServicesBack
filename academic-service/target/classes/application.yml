@@ -1,0 +1,59 @@
+# ============================================
+# application.yml - ACADEMIC SERVICE
+# ============================================
+
+spring:
+  application:
+    name: academic-service
+  
+  datasource:
+    url: jdbc:mysql://localhost:3307/academic_db?useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: 
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop  # Cambiar a 'update' en producción
+
+# Puerto del microservicio
+server:
+  port: 8081
+
+# ✅ CONFIGURACIÓN DE MICROSERVICIOS
+services:
+  auth:
+    url: http://localhost:8080
+  payment:
+    url: http://localhost:8082
+
+# Configuración de Feign Client
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 5000
+        read-timeout: 10000
+
+# Configuración de logging para debugging
+logging:
+  level:
+    com.school.academic.clients: DEBUG
+    feign: DEBUG
+
+# Circuit Breaker (opcional - Resilience4j)
+resilience4j:
+  circuitbreaker:
+    instances:
+      auth-service:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+      payment-service:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+
+# Configuración de CORS
+cors:
+  allowed-origins: http://localhost:4200
