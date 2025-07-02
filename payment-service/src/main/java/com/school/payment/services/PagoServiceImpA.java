@@ -198,6 +198,21 @@ public class PagoServiceImpA implements PagoService {
         return (List<ParametroPaga>) ppr.findAll();
     }
 
+    @Transactional
+    @Override
+    public void eliminarPagosPorAlumnoYAula(Long alumnoId, Long aulaId) {
+        List<Pago> pagos = pr.findByAlumnoIdAndAulaId(alumnoId, aulaId);
+        pr.deleteAll(pagos);
+    }
+
+    @Transactional
+    @Override
+    public void finalizarPagosPorAlumnoYAula(Long alumnoId, Long aulaId) {
+        List<Pago> pagos = pr.findByAlumnoIdAndAulaId(alumnoId, aulaId);
+        pagos.forEach(pago -> pago.setEstado(2)); // Estado finalizado
+        pr.saveAll(pagos);
+    }
+
     @Transactional(readOnly = true)
     @Override
     public List<ParametroPaga> findParametroPagas() {

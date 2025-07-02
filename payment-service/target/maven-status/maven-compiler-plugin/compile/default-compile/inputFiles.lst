@@ -1,0 +1,15 @@
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/PaymentServiceApplication.java
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/clients/AlumnoClient.java
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/controllers/PagoController.java
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/dto/AlumnoDto.java
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/dto/ContadorDto2.java
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/dto/PagoConAlumnoDto.java
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/dto/PagoDto.java
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/dto/PagoRequestDto.java
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/models/Pago.java
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/models/ParametroPaga.java
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/repositories/PagoRepository.java
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/repositories/ParametroPagaRepository.java
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/services/PagoService.java
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/services/PagoServiceImpA.java
+/Users/jhordancotrina/Desktop/SchoolBackEnd_Microservices/payment-service/src/main/java/com/school/payment/services/ParametroService.java

@@ -67,6 +67,15 @@ public class AlumnoController {
                     .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/estado/{estado}")
+    public ResponseEntity<List<AlumnoDto>> getAlumnosByEstado(@PathVariable Integer estado) {
+        List<Alumno> alumnos = as.findAllByEstado(estado);
+        List<AlumnoDto> alumnosDto = alumnos.stream()
+            .map(this::convertToDto)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(alumnosDto);
+    }
+
     @GetMapping("/estado/{x}")
     public List<Alumno> getLista(@PathVariable int x){
         return as.findAll(x);

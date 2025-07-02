@@ -5,22 +5,29 @@
 spring:
   application:
     name: payment-service
-  
+    
   datasource:
-    url: jdbc:mysql://localhost:3307/payment_db?useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/payment_db?useUnicode=true&characterEncoding=UTF-8
     username: root
     password: 
     driver-class-name: com.mysql.cj.jdbc.Driver
-  
+    
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     show-sql: true
     hibernate:
-      ddl-auto: create-drop  # Cambiar a 'update' en producción
+      ddl-auto: create  # Cambiar a 'update' en producción
 
 # Puerto del microservicio
 server:
   port: 8082
+
+# ✅ AGREGAR ESTA SECCIÓN - DESHABILITAR EUREKA
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
 
 # ✅ CONFIGURACIÓN DE MICROSERVICIOS
 services:
@@ -42,6 +49,7 @@ logging:
   level:
     com.school.payment.clients: DEBUG
     feign: DEBUG
+    com.netflix.discovery: OFF  # ✅ AGREGAR - Silenciar logs de Eureka
 
 # Circuit Breaker (opcional - Resilience4j)
 resilience4j:
@@ -57,3 +65,13 @@ resilience4j:
 # Configuración de CORS
 cors:
   allowed-origins: http://localhost:4200
+
+# ✅ AGREGAR - Health endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

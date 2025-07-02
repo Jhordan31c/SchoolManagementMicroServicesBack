@@ -46,4 +46,6 @@ public interface AlumnoService {
 
     public List<AlumnoMateria> findAllByAlumno(Long id);
 
+    public List<Alumno> findAllByEstado(Integer estado);
+
 }

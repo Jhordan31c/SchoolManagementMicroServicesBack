@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.repository.CrudRepository;
 
 import com.school.academic.dto.ContadorDto;
@@ -17,8 +18,14 @@ public interface DocenteRepository extends CrudRepository<Docente, Long> {
     @Query("SELECT d FROM Docente d WHERE d.estado = ?1")
     List<Docente> findAllBasico(int estado);
 
-    @Query("SELECT d FROM Docente d WHERE d.user.id = ?1")
-    Optional<Docente> findByIdUser(Long id);
+    @Query("SELECT d FROM Docente d WHERE d.userId = :userId")
+    Optional<Docente> findByIdUser(@Param("userId") Long userId);
+
+    @Query("SELECT d FROM Docente d WHERE d.userId IS NOT NULL AND d.estado = :estado")
+    List<Docente> findByUserIdNotNullAndEstado(@Param("estado") int estado);
+
+    @Query("SELECT COUNT(d) > 0 FROM Docente d WHERE d.userId = :userId")
+    boolean existsByUserId(@Param("userId") Long userId);
 
     @Query("SELECT NEW com.school.academic.dto.ContadorDto(d.estado, COUNT(d)) FROM Docente d "
             + "GROUP BY d.estado")

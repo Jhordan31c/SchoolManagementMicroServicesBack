@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.school.auth.dto.RolDto;
+import com.school.auth.dto.UserCreateRequestDto;
 import com.school.auth.dto.UserDto;
 import com.school.auth.models.Rol;
 import com.school.auth.models.User;
@@ -40,13 +41,25 @@ public class AuthController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createUsuario(@Valid @RequestBody User u, BindingResult br) {
-        if (br.hasFieldErrors()) {
-            return v.informe(br);
+    public ResponseEntity<UserDto> createUser(@RequestBody UserCreateRequestDto request) {
+        try {
+            User user = new User();
+            user.setUsername(request.getUsername());
+            user.setPassword(request.getPassword()); // Se encriptará en UserService
+            user.setActivo(true);
+            
+            User createdUser = us.create(user, request.getRoleId());
+            
+            UserDto userDto = convertUserToDto(createdUser);
+            return ResponseEntity.ok(userDto);
+            
+        } catch (Exception e) {
+            System.err.println("Error creando usuario: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
         }
-        User x = us.create(u, 0);
-        return ResponseEntity.status(HttpStatus.CREATED).body(x);
     }
+
+
 
      @PostMapping("/registro")
     public ResponseEntity<?> registerUsuario(@Valid @RequestBody User u, BindingResult br){

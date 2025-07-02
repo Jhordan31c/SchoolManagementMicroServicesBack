@@ -1,0 +1,3 @@
+INSERT INTO `pago-parametros` (`dia_vencimiento`, `id`, `mora`, `nivel`, `precio_matricula`, `precio_pension`) VALUES ('5', '1', '2', '1', '200', '250');
+INSERT INTO `pago-parametros` (`dia_vencimiento`, `id`, `mora`, `nivel`, `precio_matricula`, `precio_pension`) VALUES ('5', '2', '1', '2', '150', '200');
+INSERT INTO `pago-parametros` (`dia_vencimiento`, `id`, `mora`, `nivel`, `precio_matricula`, `precio_pension`) VALUES ('5', '3', '1', '3', '130', '100');

@@ -9,6 +9,8 @@ import com.school.payment.dto.PagoDto;
 import com.school.payment.models.Pago;
 import com.school.payment.models.ParametroPaga;
 import com.school.payment.services.PagoService;
+import com.school.payment.dto.PagoRequestDto;
+import com.school.payment.services.ParametroService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +21,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/pagos")
 @CrossOrigin(origins = "*")
 public class PagoController {
-   @Autowired
+    @Autowired
     private PagoService pagoService;
+
+    @Autowired
+    private ParametroService parametroService;
 
     @Autowired
     private AlumnoClient alumnoClient; // ✅ Reemplaza AlumnoService
@@ -39,7 +44,7 @@ public class PagoController {
     public ResponseEntity<Pago> getPagoById(@PathVariable Long id) {
         Optional<Pago> pago = pagoService.findById(id);
         return pago.map(ResponseEntity::ok)
-                  .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -56,7 +61,7 @@ public class PagoController {
             // Si academic-service no responde, log del error pero continúa
             System.err.println("Error al validar alumno: " + e.getMessage());
         }
-        
+
         Pago nuevoPago = pagoService.create(pago);
         return ResponseEntity.ok(nuevoPago);
     }
@@ -65,14 +70,14 @@ public class PagoController {
     public ResponseEntity<Pago> actualizar(@PathVariable Long id, @RequestBody Pago pago) {
         Optional<Pago> pagoActualizado = pagoService.update(pago, id);
         return pagoActualizado.map(ResponseEntity::ok)
-                             .orElse(ResponseEntity.badRequest().build());
+                .orElse(ResponseEntity.badRequest().build());
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Pago> eliminar(@PathVariable Long id) {
         Optional<Pago> pagoEliminado = pagoService.delete(id);
         return pagoEliminado.map(ResponseEntity::ok)
-                           .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // =============================================
@@ -91,13 +96,13 @@ public class PagoController {
             List<Pago> pagos = pagoService.findAllByIdAlumno(id);
             // Convertir a DTO sin datos de alumno
             List<PagoConAlumnoDto> pagosDto = pagos.stream()
-                .map(pago -> new PagoConAlumnoDto(pago, null))
-                .collect(java.util.stream.Collectors.toList());
+                    .map(pago -> new PagoConAlumnoDto(pago, null))
+                    .collect(java.util.stream.Collectors.toList());
             return ResponseEntity.ok(pagosDto);
         }
     }
 
-      @GetMapping("/alumnos/{id}/{año}")
+    @GetMapping("/alumnos/{id}/{año}")
     public ResponseEntity<List<Pago>> listaPorAlumnoYAño(@PathVariable Long id, @PathVariable Integer año) {
         List<Pago> pagos = pagoService.findAllByIdAlumnoByYear(id, año);
         return ResponseEntity.ok(pagos);
@@ -114,9 +119,8 @@ public class PagoController {
     public ResponseEntity<Pago> actualizarEstado(@PathVariable Long id, @PathVariable int estado) {
         Optional<Pago> pagoActualizado = pagoService.updateEstado(id, estado);
         return pagoActualizado.map(ResponseEntity::ok)
-                             .orElse(ResponseEntity.badRequest().build());
+                .orElse(ResponseEntity.badRequest().build());
     }
-
 
     // =============================================
     // ⚙️ ENDPOINTS DE PARÁMETROS
@@ -128,10 +132,83 @@ public class PagoController {
         return ResponseEntity.ok(parametros);
     }
 
+    @GetMapping("/nivel/{nivel}")
+    public ResponseEntity<ParametroPaga> getParametrosPorNivel(@PathVariable int nivel) {
+        try {
+            Optional<ParametroPaga> parametro = parametroService.findByNivel(nivel);
+
+            if (parametro.isPresent()) {
+                ParametroPaga p = parametro.get();
+                ParametroPaga dto = new ParametroPaga(
+                        p.getId(),
+                        p.getPrecioMatricula(),
+                        p.getPrecioPension(),
+                        p.getNivel(),
+                        p.getDia_vencimiento(),
+                        p.getMora());
+                return ResponseEntity.ok(dto);
+            }
+
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @PutMapping("/parametros")
     public ResponseEntity<List<ParametroPaga>> actualizarParametros(@RequestBody List<ParametroPaga> lista) {
         List<ParametroPaga> parametrosActualizados = pagoService.updateParametrosPago(lista);
         return ResponseEntity.ok(parametrosActualizados);
+    }
+
+    @PostMapping("/masivos")
+    public ResponseEntity<String> crearPagosMasivos(@RequestBody List<PagoRequestDto> pagosRequest) {
+        try {
+            pagosRequest.forEach(pagoDto -> {
+                Pago pago = new Pago();
+                pago.setNombre(pagoDto.getNombre());
+                pago.setMonto(pagoDto.getMonto());
+                pago.setFecha_vencimiento(pagoDto.getFechaVencimiento());
+                pago.setEstado(pagoDto.getEstado());
+                pago.setAlumnoId(pagoDto.getAlumnoId());
+                pago.setAulaId(pagoDto.getAulaId()); // ✅ Agregar campo aulaId a Pago si no existe
+
+                pagoService.create(pago);
+            });
+
+            return ResponseEntity.ok("Pagos creados exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Error creando pagos: " + e.getMessage());
+        }
+    }
+
+    // ✅ ENDPOINT PARA ELIMINAR PAGOS POR ALUMNO Y AULA
+    @DeleteMapping("/alumno/{alumnoId}/aula/{aulaId}")
+    public ResponseEntity<String> eliminarPagosPorAlumnoYAula(@PathVariable Long alumnoId,
+            @PathVariable Long aulaId) {
+        try {
+            // Implementar en PagoService
+            pagoService.eliminarPagosPorAlumnoYAula(alumnoId, aulaId);
+            return ResponseEntity.ok("Pagos eliminados exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Error eliminando pagos: " + e.getMessage());
+        }
+    }
+
+    // ✅ ENDPOINT PARA FINALIZAR PAGOS POR ALUMNO Y AULA
+    @PutMapping("/alumno/{alumnoId}/aula/{aulaId}/finalizar")
+    public ResponseEntity<String> finalizarPagosPorAlumnoYAula(@PathVariable Long alumnoId,
+            @PathVariable Long aulaId) {
+        try {
+            // Implementar en PagoService
+            pagoService.finalizarPagosPorAlumnoYAula(alumnoId, aulaId);
+            return ResponseEntity.ok("Pagos finalizados exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Error finalizando pagos: " + e.getMessage());
+        }
     }
 
 }

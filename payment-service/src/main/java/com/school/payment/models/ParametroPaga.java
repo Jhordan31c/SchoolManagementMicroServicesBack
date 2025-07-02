@@ -23,6 +23,14 @@ public class ParametroPaga {
     
     public ParametroPaga() {
     }
+    public ParametroPaga(int id, double precioMatricula, double precioPension, int nivel, int dia_vencimiento, int mora) {
+        this.id = id;
+        this.precioMatricula = precioMatricula;
+        this.precioPension = precioPension;
+        this.nivel = nivel;
+        this.dia_vencimiento = dia_vencimiento;
+        this.mora = mora;
+    }
 
 
     public int getId() {

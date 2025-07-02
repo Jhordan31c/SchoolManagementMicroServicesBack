@@ -10,9 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.school.academic.clients.UserClient;
+import com.school.academic.dto.UserCreateRequestDto;
 import com.school.academic.dto.AlumnoMateriaDto;
 import com.school.academic.dto.AulaAsignadaDto;
 import com.school.academic.dto.HorarioDocenteDto;
+import com.school.academic.dto.UserDto;
 import com.school.academic.models.Alumno;
 import com.school.academic.models.AlumnoMateria;
 import com.school.academic.models.Docente;
@@ -29,8 +32,9 @@ public class DocenteService {
     @Autowired
     DocenteRepository dr;
     
+    // ✅ NUEVO: Cliente para comunicarse con auth-service
     @Autowired
-    UserService us;
+    UserClient userClient;
 
     @Autowired
     HorarioRepository hr;
@@ -65,21 +69,45 @@ public class DocenteService {
 
 
 
+    // ✅ MÉTODO REFACTORIZADO: create
     @Transactional
     public Docente create(Docente d){
         d.setId(null);
         d.setFecha_registro(new Date());
         d.setEstado(1);
 
-        if (d.getUser()!=null) {
-            User u = d.getUser();
-            d.setUser(us.create(u,2));
+        // ✅ CREAR USUARIO VIA AUTH-SERVICE
+        if (d.getUser() != null) {
+            try {
+                UserCreateRequestDto userRequest = new UserCreateRequestDto(
+                    d.getUser().getUsername(),
+                    d.getUser().getPassword(),
+                    2 // Rol 2 = Docente
+                );
+
+                UserDto createdUser = userClient.createUserCDTo(userRequest);
+                
+                if (createdUser != null) {
+                    // ✅ Solo guardar el userId, no la entidad completa
+                    d.setUserId(createdUser.getId());
+                    d.setUser(null); // Limpiar para evitar problemas de persistencia
+                } else {
+                    System.err.println("Error: No se pudo crear usuario para docente");
+                    // Continuar sin usuario (el sistema debe ser resiliente)
+                }
+                
+            } catch (Exception e) {
+                System.err.println("Error comunicándose con auth-service: " + e.getMessage());
+                // Continuar sin usuario si auth-service no responde
+                d.setUser(null);
+            }
         }
         
         return dr.save(d);
     }
 
 
+    // ✅ MÉTODO REFACTORIZADO: update
     @Transactional
     public Optional<Docente> update(Long id, Docente d){
         Optional<Docente> od = dr.findById(id);
@@ -87,39 +115,82 @@ public class DocenteService {
         if(od.isPresent()){ 
             Docente x = od.orElseThrow();
             
-            if(d.getDni()       !=null){
-                x.setDni        (d.getDni()     );
+            // Actualizar campos básicos del docente
+            if(d.getDni() != null){
+                x.setDni(d.getDni());
             }
-            if(d.getNombre()    !=null) {
-                x.setNombre     (d.getNombre()  );
+            if(d.getNombre() != null) {
+                x.setNombre(d.getNombre());
             }
-            if(d.getApellido()  !=null){
-                x.setApellido   (d.getApellido());
+            if(d.getApellido() != null){
+                x.setApellido(d.getApellido());
             }
-            if(d.getCorreo()    !=null) {
-                x.setCorreo     (d.getCorreo()  );
+            if(d.getCorreo() != null) {
+                x.setCorreo(d.getCorreo());
             }
             
-            x.setEstado     (d.getEstado()  );
+            x.setEstado(d.getEstado());
             
-            if(x.getUser() !=null   &&  d.getUser() !=null){
-                us.update(x.getUser(), d.getUser());
-            } 
-            else if (x.getUser() ==null  && d.getUser() != null) {
-                User u = d.getUser();
-                x.setUser(us.create(u,2));
+            // ✅ MANEJAR ACTUALIZACIÓN DE USUARIO VIA AUTH-SERVICE
+            try {
+                if(x.getUserId() != null && d.getUser() != null){
+                    // Actualizar usuario existente
+                    UserDto updateRequest = new UserDto();
+                    updateRequest.setId(x.getUserId());
+                    updateRequest.setUsername(d.getUser().getUsername());
+                    updateRequest.setActivo(d.getUser().isActivo());
+                    
+                    UserDto updatedUser = userClient.updateUser(x.getUserId(), updateRequest);
+                    
+                    if (updatedUser == null) {
+                        System.err.println("Warning: No se pudo actualizar usuario para docente " + id);
+                    }
+                    
+                } else if (x.getUserId() == null && d.getUser() != null) {
+                    // Crear nuevo usuario para docente existente
+                    UserCreateRequestDto userRequest = new UserCreateRequestDto(
+                        d.getUser().getUsername(),
+                        d.getUser().getPassword(),
+                        2 // Rol docente
+                    );
+
+                    UserDto createdUser = userClient.createUserCDTo(userRequest);
+                    
+                    if (createdUser != null) {
+                        x.setUserId(createdUser.getId());
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error actualizando usuario para docente " + id + ": " + e.getMessage());
+                // Continuar con la actualización del docente aunque falle el usuario
             }
+            
             return Optional.of(dr.save(x));
         }
             
         return od;
     }
 
-
     @Transactional
     public Optional<Docente> delete(Long id){
         Optional<Docente> od = dr.findById(id);
-        od.ifPresent(x->dr.delete(x));
+        
+        // ✅ ELIMINAR USUARIO VIA AUTH-SERVICE ANTES DE ELIMINAR DOCENTE
+        if (od.isPresent()) {
+            Docente docente = od.get();
+            
+            if (docente.getUserId() != null) {
+                try {
+                    userClient.deleteUser(docente.getUserId());
+                } catch (Exception e) {
+                    System.err.println("Error eliminando usuario del docente " + id + ": " + e.getMessage());
+                    // Continuar con eliminación del docente aunque falle el usuario
+                }
+            }
+            
+            dr.delete(docente);
+        }
+        
         return od;
     }
 

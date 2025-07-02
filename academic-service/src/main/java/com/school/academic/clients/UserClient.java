@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.school.academic.dto.UserCreateRequestDto;
 import com.school.academic.dto.UserDto;
 
 @FeignClient(name = "auth-service", url = "${services.auth.url}")
@@ -22,6 +23,9 @@ public interface UserClient {
     // CREAR NUEVO USUARIO
     @PostMapping("/users")
     UserDto createUser(@RequestBody UserDto userRequest);
+
+    @PostMapping("/users")
+    UserDto createUserCDTo(@RequestBody UserCreateRequestDto request);
     
     // ACTUALIZAR USUARIO EXISTENTE
     @PutMapping("/users/{id}")

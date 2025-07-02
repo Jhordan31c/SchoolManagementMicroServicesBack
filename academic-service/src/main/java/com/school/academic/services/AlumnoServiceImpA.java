@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -23,7 +22,6 @@ import com.school.academic.repositories.AlumnoRepository;
 import com.school.academic.repositories.ApoderadoRepository;
 import com.school.academic.repositories.AulaRepository;
 import com.school.academic.repositories.HorarioRepository;
-import com.netflix.discovery.converters.Auto;
 import com.school.academic.clients.PaymentClient;
 import com.school.academic.clients.UserClient;
 import com.school.academic.dto.UserDto;
@@ -85,6 +83,12 @@ public class AlumnoServiceImpA implements AlumnoService {
     @Override
     public Optional<Alumno> findByIdWithPagos(Long id) {
         return ar.findByIdWithPagos(id);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<Alumno> findAllByEstado(Integer estado) {
+        return ar.findAllByEstado(estado);
     }
 
     @Transactional(readOnly = true)

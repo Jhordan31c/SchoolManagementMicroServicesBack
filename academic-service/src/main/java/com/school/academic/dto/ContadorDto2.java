@@ -4,6 +4,14 @@ public class ContadorDto2 {
     private int orden;
     private double cantidad;
 
+    public ContadorDto2() {
+    }
+
+    public ContadorDto2(int orden, double cantidad) {
+        this.orden = orden;
+        this.cantidad = cantidad;
+    }
+
     public int getOrden() {
         return orden;
     }
@@ -20,9 +28,5 @@ public class ContadorDto2 {
         this.cantidad = cantidad;
     }
 
-    public ContadorDto2(int orden, double cantidad) {
-        this.orden = orden;
-        this.cantidad = cantidad;
-    }
 
 }

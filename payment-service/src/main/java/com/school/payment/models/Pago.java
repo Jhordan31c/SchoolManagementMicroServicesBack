@@ -2,7 +2,6 @@ package com.school.payment.models;
 
 import java.util.Date;
 
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,7 +15,7 @@ import com.school.payment.dto.AlumnoDto;
 @Entity
 @Table(name = "alumno_pagos")
 public class Pago {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,9 +25,12 @@ public class Pago {
     // @JoinColumn(name = "id_alumno")
     // private Alumno alumno;
 
-    //  POR ESTO:
+    // POR ESTO:
     @Column(name = "id_alumno", nullable = false)
     private Long alumnoId; // ✅ Solo referencia por ID
+
+    @Column(name = "aula_id")
+    private Long aulaId;
 
     private String nombre;
     private String detalle;
@@ -37,12 +39,13 @@ public class Pago {
     private Date fecha_vencimiento;
     private int estado;
 
-    //  DATOS EXTERNOS (NO SE PERSISTEN)
+    // DATOS EXTERNOS (NO SE PERSISTEN)
     @Transient
     private AlumnoDto alumno; // ✅ Se puede llenar con AlumnoClient si necesitas
 
     // Constructores
-    public Pago() {}
+    public Pago() {
+    }
 
     public Pago(String nombre, Double monto, Date fecha_vencimiento, int estado) {
         this.nombre = nombre;
@@ -76,6 +79,9 @@ public class Pago {
     public void setAlumnoId(Long alumnoId) {
         this.alumnoId = alumnoId;
     }
+
+    public Long getAulaId() { return aulaId; }
+    public void setAulaId(Long aulaId) { this.aulaId = aulaId; }
 
     // ✅ MANTENER PARA COMPATIBILIDAD CON DTO
     public AlumnoDto getAlumno() {
@@ -136,7 +142,7 @@ public class Pago {
 
     @Override
     public String toString() {
-        return "Pago [id=" + id + ", alumnoId=" + alumnoId + ", nombre=" + nombre + 
-               ", monto=" + monto + ", fecha_vencimiento=" + fecha_vencimiento + "]";
+        return "Pago [id=" + id + ", alumnoId=" + alumnoId + ", nombre=" + nombre +
+                ", monto=" + monto + ", fecha_vencimiento=" + fecha_vencimiento + "]";
     }
 }

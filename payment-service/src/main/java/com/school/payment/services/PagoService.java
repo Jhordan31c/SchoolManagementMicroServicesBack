@@ -25,7 +25,7 @@ public interface PagoService {
     Optional<Pago> delete(Long id);
 
     void generalCreate(Pago p, Integer x);
-    
+
     Optional<Pago> updateEstado(Long id, int estado);
 
     List<ParametroPaga> findParametroPagas();
@@ -43,7 +43,10 @@ public interface PagoService {
     List<Pago> findPagosVencidosByAlumno(Long alumnoId);
 
     int countPagosPendientesByAlumno(Long alumnoId);
-    
+
     Double sumMontosPagadosByAlumno(Long alumnoId);
 
+    void eliminarPagosPorAlumnoYAula(Long alumnoId, Long aulaId);
+
+    void finalizarPagosPorAlumnoYAula(Long alumnoId, Long aulaId);
 }
